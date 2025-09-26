@@ -120,6 +120,42 @@ class KinematicCarMotionModel:
         # Hint: you may find the np.random.normal function useful
         # BEGIN QUESTION 1.2
         "*** REPLACE THIS LINE ***"
+
+        # sample M noisy controls
+        M = states.shape[0]
+        vels = np.random.normal(vel, self.vel_std**2, M)
+        deltas = np.random.normal(delta, self.delta_std, M)
+
+        # print(f"vels.shape {vels.shape}")
+        controls = np.stack((vels, deltas), axis=1)
+
+        # print(f"controls.shape {controls.shape}")
+        # print(f"states.shape {states.shape}")
+
+        # compute the changes with the noisy controls
+        changes = self.compute_changes(states, controls, dt)
+
+        # apply the changes
+        states += changes
+
+        # # add noise to the resulting states
+        # covariance = np.zeros((3, 3))
+        # covariance[0, 0] = self.x_std**2
+        # covariance[1, 1] = self.y_std**2
+        # covariance[2, 2] = self.theta_std**2
+
+        # L = np.linalg.cholesky(covariance)                   # (3,3)
+
+        # # Standard normals
+        # Z = np.random.normal(size=(M, 3))               # (M,3)
+
+        # # Apply covariance + per-sample mean
+        # states = Z @ L.T + states  
+        
+        # states = Z + states                           # (M,3)
+
+        states = np.random.normal(loc=states, scale=np.array([self.x_std**2, self.y_std**2, self.theta_std**2]), size=states.shape)
+
         # END QUESTION 1.2
 
 
