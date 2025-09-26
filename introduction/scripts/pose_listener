@@ -41,7 +41,7 @@ if __name__ == "__main__":
     plt.axis("equal")
     # By default, the figure will be saved to ~/.ros/locations.png; modify this
     # line to save it elsewhere.
-    plt.savefig("locations.png")
+    plt.savefig("/home/robotics/mushr_ws/src/alg_fnd_mushr/introduction/locations.png")
     # Uncomment plt.show() to visualize the plot
     # plt.show()
 
@@ -49,4 +49,13 @@ if __name__ == "__main__":
     # plot the distance over time as a line chart and save the plot.
     # BEGIN QUESTION 2.5
     "*** REPLACE THIS LINE ***"
+    locations_norm = norm_numpy(locations)
+
+    plt.figure()
+    plt.plot(locations_norm)
+    plt.title("Car Distance from Origin")
+    plt.xlabel("time")
+    plt.ylabel("Distance (m)")
+    plt.axis("equal")
+    plt.savefig("/home/robotics/mushr_ws/src/alg_fnd_mushr/introduction/distances.png")
     # END QUESTION 2.5

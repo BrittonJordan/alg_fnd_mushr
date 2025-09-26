@@ -1,3 +1,4 @@
+
 def compute_fibonacci(n):
     """Return the nth Fibonacci number.
 
@@ -14,4 +15,16 @@ def compute_fibonacci(n):
     """
     # BEGIN QUESTION 1.1
     "*** REPLACE THIS LINE ***"
-    # END QUESTION 1.1
+
+    if n == 0:
+        return 0
+
+    curr = 1
+    past = 0
+    for _ in range(n - 1):
+        new_past = curr
+        curr = past + curr
+        past = new_past
+    
+    return curr
+

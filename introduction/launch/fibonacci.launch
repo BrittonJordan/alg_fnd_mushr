@@ -6,7 +6,7 @@
         line (or from other launch files)
     -->
     <arg name="index" default="10" />
-    <arg name="fibonacci_output_topic" default="/introduction/fib_output" />
+    <arg name="fibonacci_output_topic" default="/introduction/fibonacci_output" />
     <!--
         To change the argument at run time from the command line
         $ roslaunch introduction fibonacci.launch index:=1
@@ -37,6 +37,7 @@
         -->
 	<!-- BEGIN QUESTION 1.3 -->
 	<!-- REPLACE THIS LINE -->
+        <param name="fibonacci_index" value="$(arg index)"/>
 	<!-- END QUESTION 1.3 -->
     </node>
 </launch>
