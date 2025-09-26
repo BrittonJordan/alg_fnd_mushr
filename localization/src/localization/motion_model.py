@@ -55,8 +55,8 @@ class KinematicCarMotionModel:
         orientation component of state) does not change in this case.
 
         Args:
-            states: np.array of states with shape M x 3
-            controls: np.array of controls with shape M x 2
+            states: np.array of states with shape M x 3  (x, y, theta)
+            controls: np.array of controls with shape M x 2  (v, delta)
             dt (float): control duration
             delta_threshold (float): steering angle threshold
 
@@ -65,7 +65,33 @@ class KinematicCarMotionModel:
         """
         # BEGIN QUESTION 1.1
         "*** REPLACE THIS LINE ***"
-        return np.zeros_like(states, dtype=float)
+
+        non_zero_steer_states = controls[:, 1] > delta_threshold
+        states_t1 = np.zeros_like(states, dtype=float)
+        changes = np.zeros_like(states, dtype=float)
+
+        # theta
+        changes[non_zero_steer_states, 2] = (controls[non_zero_steer_states, 0] / self.car_length) * np.tan(controls[non_zero_steer_states, 1]) * dt
+        states_t1[non_zero_steer_states, 2] = states[non_zero_steer_states, 2] + changes[non_zero_steer_states, 2]
+        
+        # x
+        changes[non_zero_steer_states, 0] = (self.car_length / np.tan(controls[non_zero_steer_states, 1])) * (np.sin(states_t1[non_zero_steer_states, 2]) - np.sin(states[non_zero_steer_states, 2]))
+        states_t1[non_zero_steer_states, 0] = states[non_zero_steer_states, 0] + changes[non_zero_steer_states, 0]
+        
+        # y
+        changes[non_zero_steer_states, 1] = (self.car_length / np.tan(controls[non_zero_steer_states, 1])) * (-np.cos(states_t1[non_zero_steer_states, 2]) + np.cos(states[non_zero_steer_states, 2]))
+        states_t1[non_zero_steer_states, 1] = states[non_zero_steer_states, 1] + changes[non_zero_steer_states, 1]
+        
+        # For the case where the delta is small
+        changes[~non_zero_steer_states, 0] = controls[~non_zero_steer_states, 0] * np.cos(states[~non_zero_steer_states, 2]) * dt
+        states_t1[~non_zero_steer_states, 0] = states[~non_zero_steer_states, 0] + changes[~non_zero_steer_states, 0]
+
+        changes[~non_zero_steer_states, 1] = controls[~non_zero_steer_states, 0] * np.sin(states[~non_zero_steer_states, 2]) * dt
+        states_t1[~non_zero_steer_states, 1] = states[~non_zero_steer_states, 1] + changes[~non_zero_steer_states, 1]
+        # no change to delta    
+        
+        return changes
+        # return np.zeros_like(states, dtype=float)
         # END QUESTION 1.1
 
     def apply_motion_model(self, states, vel, delta, dt):
