@@ -9,7 +9,7 @@ from std_msgs.msg import Int64
 
 class TestFibonacciSmall(unittest.TestCase):
     def test_fibonacci_small(self):
-        message = rospy.wait_for_message("/fibonacci_output", Int64, timeout=5)
+        message = rospy.wait_for_message("/introduction/fibonacci_output", Int64, timeout=5)
         self.assertEqual(message.data, 89)
 
 
