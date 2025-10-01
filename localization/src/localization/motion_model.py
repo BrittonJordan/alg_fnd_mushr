@@ -66,7 +66,7 @@ class KinematicCarMotionModel:
         # BEGIN QUESTION 1.1
         "*** REPLACE THIS LINE ***"
 
-        non_zero_steer_states = controls[:, 1] > delta_threshold
+        non_zero_steer_states = controls[:, 1] >= delta_threshold
         states_t1 = np.zeros_like(states, dtype=float)
         changes = np.zeros_like(states, dtype=float)
 
@@ -89,6 +89,10 @@ class KinematicCarMotionModel:
         changes[~non_zero_steer_states, 1] = controls[~non_zero_steer_states, 0] * np.sin(states[~non_zero_steer_states, 2]) * dt
         states_t1[~non_zero_steer_states, 1] = states[~non_zero_steer_states, 1] + changes[~non_zero_steer_states, 1]
         # no change to delta    
+        changes[~non_zero_steer_states, 2] = 0
+        # Use linearized heading change for small delta
+        # changes[~non_zero_steer_states, 2] = (controls[~non_zero_steer_states, 0] / self.car_length) * controls[~non_zero_steer_states, 1] * dt
+
         
         return changes
         # return np.zeros_like(states, dtype=float)
@@ -121,40 +125,45 @@ class KinematicCarMotionModel:
         # BEGIN QUESTION 1.2
         "*** REPLACE THIS LINE ***"
 
-        # sample M noisy controls
-        M = states.shape[0]
-        vels = np.random.normal(vel, self.vel_std**2, M)
-        deltas = np.random.normal(delta, self.delta_std, M)
+        # sample n_particles noisy controls
+        vels = np.random.normal(vel, self.vel_std, n_particles)
+        deltas = np.random.normal(delta, self.delta_std, n_particles)
 
-        # print(f"vels.shape {vels.shape}")
         controls = np.stack((vels, deltas), axis=1)
-
-        # print(f"controls.shape {controls.shape}")
-        # print(f"states.shape {states.shape}")
 
         # compute the changes with the noisy controls
         changes = self.compute_changes(states, controls, dt)
 
-        # apply the changes
-        states += changes
+        # apply the changes to the states
+        np.add(states, changes, out=states)   # guaranteed in-place
 
-        # # add noise to the resulting states
-        # covariance = np.zeros((3, 3))
-        # covariance[0, 0] = self.x_std**2
-        # covariance[1, 1] = self.y_std**2
-        # covariance[2, 2] = self.theta_std**2
+        # model noise
+        noise = np.random.normal(
+            loc=0.0,
+            scale=[self.x_std, self.y_std, self.theta_std],
+            size=states.shape,
+        )
+        # apply model noise to the states
+        np.add(states, noise, out=states) # guaranteed in-place
 
-        # L = np.linalg.cholesky(covariance)                   # (3,3)
+        # wrap angles to be (-pi, pi]
+        # approach 1
+        # states[:, 2] = np.arctan2(np.sin(states[:, 2]), np.cos(states[:, 2]))
 
-        # # Standard normals
-        # Z = np.random.normal(size=(M, 3))               # (M,3)
+        # approach 2
+        # moded = np.fmod(states[:, 2], 2 * np.pi)
 
-        # # Apply covariance + per-sample mean
-        # states = Z @ L.T + states  
-        
-        # states = Z + states                           # (M,3)
+        # moded[np.abs(moded) > np.pi] =  - np.sign(moded[np.abs(moded) > np.pi]) * (2 * np.pi - np.abs(moded[np.abs(moded) > np.pi]))
 
-        states = np.random.normal(loc=states, scale=np.array([self.x_std**2, self.y_std**2, self.theta_std**2]), size=states.shape)
+        # states[:, 2] = moded
+
+        # approach 3
+        theta = states[:, 2]
+        theta = (theta + np.pi) % (2.0 * np.pi) - np.pi
+        theta = np.where(theta <= -np.pi + 1e-12, np.pi, theta)
+        states[:, 2] = theta
+
+        print("HOLD")
 
         # END QUESTION 1.2
 
