@@ -6,6 +6,7 @@ import range_libc
 import rospy
 from sensor_msgs.msg import LaserScan
 from rospy.numpy_msg import numpy_msg
+import math
 
 
 class SingleBeamSensorModel:
@@ -74,10 +75,54 @@ class SingleBeamSensorModel:
         # or the simulated (expected) measurement d (sim_r).
         obs_r, sim_r = np.mgrid[0:table_width, 0:table_width]
 
+        # obs_r 
+        # [[0 0 0 0]
+        # [1 1 1 1]
+        # [2 2 2 2]
+        # [3 3 3 3]]
+
+        # sim_r =
+        # [[0 1 2 3]
+        # [0 1 2 3]
+        # [0 1 2 3]
+        # [0 1 2 3]]
+
+        # Utilize these
+        # defaults = {
+        #     "hit_std": 1.0,
+        #     "z_hit": 0.5,
+        #     "z_short": 0.05,
+        #     "z_max": 0.05,
+        #     "z_rand": 0.5,
+        # }
+
         # Use obs_r and sim_r to vectorize the sensor model precomputation.
         diff = sim_r - obs_r
         # BEGIN QUESTION 2.1
         "*** REPLACE THIS LINE ***"
+
+        # p_hit = np.zeros_like(prob_table)
+        if self.hit_std == 0.0:
+            p_hit = np.zeros_like(prob_table)
+        else:
+            p_hit =  (1 / math.sqrt(2 * math.pi * self.hit_std**2)) * np.exp((-1 / 2) * np.square(diff / self.hit_std))
+
+        p_short = (2 * diff) / sim_r
+        p_short[obs_r > sim_r] = 0
+        p_short[0, 0] = 0
+
+        p_max = np.zeros_like(prob_table)
+        p_max[obs_r == max_r] = 1
+
+        p_rand = np.ones_like(prob_table) / max_r
+        p_rand[max_r] = 0
+
+        prob_table = self.z_hit * p_hit + self.z_short * p_short + self.z_max * p_max + self.z_rand * p_rand # weighted sum
+
+        # every row must sum to 1. Why rows not columns?
+        row_sums = np.sum(prob_table, axis = 0)
+        prob_table = prob_table / row_sums
+
         # END QUESTION 2.1
 
         return prob_table
