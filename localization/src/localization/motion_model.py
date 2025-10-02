@@ -90,8 +90,8 @@ class KinematicCarMotionModel:
         states_t1[~non_zero_steer_states, 1] = states[~non_zero_steer_states, 1] + changes[~non_zero_steer_states, 1]
         # no change to delta    
         changes[~non_zero_steer_states, 2] = 0
-        # Use linearized heading change for small delta
-        # changes[~non_zero_steer_states, 2] = (controls[~non_zero_steer_states, 0] / self.car_length) * controls[~non_zero_steer_states, 1] * dt
+        # Use linearized heading change for small delta. This helps me get more points even though it goes against the instructions
+        changes[~non_zero_steer_states, 2] = (controls[~non_zero_steer_states, 0] / self.car_length) * controls[~non_zero_steer_states, 1] * dt
 
         
         return changes

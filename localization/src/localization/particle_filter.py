@@ -30,7 +30,7 @@ class ParticleInitializer:
         self.y_std = y_std
         self.theta_std = theta_std
 
-    def reset_click_pose(self, msg, particles, weights):
+    def reset_click_pose(self, msg: Pose, particles, weights):
         """Initialize the particles and weights in-place.
 
         The particles should be sampled from a Gaussian distribution around the
@@ -45,6 +45,16 @@ class ParticleInitializer:
         # Hint: use utils.quaternion_to_angle to compute the orientation theta.
         # BEGIN QUESTION 3.1
         "*** REPLACE THIS LINE ***"
+
+
+        angle_orientation = utils.quaternion_to_angle(msg.orientation)
+        msg.position
+        particles[:, 0] = np.random.normal(msg.position.x, scale=self.x_std, size=n_particles)
+        particles[:, 1] = np.random.normal(msg.position.y, scale=self.y_std, size=n_particles)
+        particles[:, 2] = np.random.normal(angle_orientation, scale=self.theta_std, size=n_particles)
+
+        weights[:] = 1.0 / n_particles
+
         # END QUESTION 3.1
 
 
