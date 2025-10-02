@@ -163,8 +163,6 @@ class KinematicCarMotionModel:
         theta = np.where(theta <= -np.pi + 1e-12, np.pi, theta)
         states[:, 2] = theta
 
-        print("HOLD")
-
         # END QUESTION 1.2
 
 
