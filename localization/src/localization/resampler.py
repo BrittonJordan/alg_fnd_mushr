@@ -40,4 +40,25 @@ class LowVarianceSampler:
         with self.state_lock:
             # BEGIN QUESTION 3.2
             "*** REPLACE THIS LINE ***"
+
+            weight_sum = np.sum(self.weights)
+            if weight_sum != 1.0:
+                self.weights /= weight_sum
+            
+            scaled_weights = self.weights * self.n_particles # now the sum of scaled_weights should be n_particles
+
+            scaled_weights_cumulative = np.cumsum(scaled_weights)
+
+            start = np.random.random() * (1 / self.n_particles)
+
+            locations_of_new_samples = (start + np.arange(self.n_particles) * (1 / self.n_particles)) * 100
+
+            new_samples_indicies = np.searchsorted(scaled_weights_cumulative, locations_of_new_samples)
+
+            # print(new_samples_indicies)
+
+            self.particles[:] = self.particles[new_samples_indicies]
+
+            self.weights[:] = 1 / self.n_particles
+
             # END QUESTION 3.2
