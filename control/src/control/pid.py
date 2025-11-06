@@ -31,7 +31,7 @@ class PIDController(BaseController):
 
         Args:
             pose: current state of the vehicle [x, y, heading]
-            reference_xytv: reference state and speed
+            reference_xytv: reference state and speed [x, y, heading, v]
             error: error vector from get_error
 
         Returns:
@@ -40,5 +40,12 @@ class PIDController(BaseController):
         """
         # BEGIN QUESTION 2.1
         "*** REPLACE THIS LINE ***"
-        raise NotImplementedError
+
+        p = error[1]#pose[2] - reference_xytv[2]
+        d = reference_xytv[3] * np.sin(pose[2] - reference_xytv[2])
+
+        pd_theta = -1 * self.kp * p + -1 * self.kd * d
+
+        control = np.array([reference_xytv[3], pd_theta])
+        return control
         # END QUESTION 2.1
