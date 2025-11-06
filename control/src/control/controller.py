@@ -2,6 +2,7 @@ from __future__ import division
 import numpy as np
 import threading
 import time
+import math
 
 
 def compute_position_in_frame(p, frame):
@@ -16,7 +17,15 @@ def compute_position_in_frame(p, frame):
     """
     # BEGIN QUESTION 1.2
     "*** REPLACE THIS LINE ***"
-    raise NotImplementedError
+
+    rotation_matrix = np.array([
+    [math.cos(frame[2]), math.sin(frame[2])],
+    [-math.sin(frame[2]), math.cos(frame[2])]
+])
+
+    position_in_new = rotation_matrix @ (p[0:2] - frame[0:2])
+
+    return position_in_new
     # END QUESTION 1.2
 
 
