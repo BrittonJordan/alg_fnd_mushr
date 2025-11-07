@@ -42,10 +42,22 @@ class PurePursuitController(BaseController):
         
         lookahead_squared = e_x**2 + e_y**2
 
-        if lookahead_squared < 1e-6:
-            steering_angle = 0.0
-        else:
-            steering_angle = np.arctan2(2.0 * self.car_length * e_y, lookahead_squared)
+        ##
+
+        lookahead = np.sqrt(lookahead_squared)
+
+        heading_offset = np.arctan2(e_y, e_x)
+
+        curvature = 2 * np.sin(heading_offset) / lookahead
+
+        steering_angle = np.arctan(self.car_length * curvature)
+
+        ##
+
+        # if lookahead_squared < 1e-6:
+        #     steering_angle = 0.0
+        # else:
+        #     steering_angle = np.arctan2(2.0 * self.car_length * e_y, lookahead_squared)
 
         control = np.array([reference_xytv[3], steering_angle])
         return control
