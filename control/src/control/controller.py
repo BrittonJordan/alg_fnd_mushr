@@ -88,9 +88,9 @@ class BaseController(object):
             # BEGIN QUESTION 1.1
             "*** REPLACE THIS LINE ***"
 
-            print(f"pose: {pose}")
-            print(f"path_xytv: {path_xytv}")
-            print(f"distance_lookahead: {distance_lookahead}")
+            # print(f"pose: {pose}")
+            # print(f"path_xytv: {path_xytv}")
+            # print(f"distance_lookahead: {distance_lookahead}")
 
             distance_from_current = np.sqrt(np.square(pose[0] - path_xytv[:, 0]) + np.square(pose[1] - path_xytv[:, 1])) # closest spatially, ignoring heading
 
@@ -98,9 +98,12 @@ class BaseController(object):
 
             future_waypoints_far_enough_away = (np.arange(len(path_xytv)) > index_of_closest_waypoint) * (distance_from_current > distance_lookahead)
 
-            first_valid_index = np.where(future_waypoints_far_enough_away)[0][0]
+            intermediate = np.where(future_waypoints_far_enough_away)[0]
+            if len(intermediate) == 0:
+                return len(path_xytv) - 1 # the last state
+            first_valid_index = intermediate[0]
             print(f"future_waypoints_far_enough_away:  {future_waypoints_far_enough_away}")
-            print(f"first_valid_index: {first_valid_index}")
+            # print(f"first_valid_index: {first_valid_index}")
 
 
             # END QUESTION 1.1
