@@ -37,6 +37,20 @@ class PurePursuitController(BaseController):
             control: np.array of velocity and steering angle
         """
         # BEGIN QUESTION 3.1
-        "*** REPLACE THIS LINE ***"
-        raise NotImplementedError
+
+        e_x, e_y = float(error[0]), float(error[1])
+        
+        lookahead_squared = e_x**2 + e_y**2
+
+        if lookahead_squared < 1e-6:
+            steering_angle = 0.0
+        else:
+            steering_angle = np.arctan2(2.0 * self.car_length * e_y, lookahead_squared)
+
+        control = np.array([reference_xytv[3], steering_angle])
+        return control
         # END QUESTION 3.1
+
+        # alpha =  (np.arctan2((reference_xytv[1] - pose[1]), (reference_xytv[0] - pose[0])) - pose[2]) # tracks wave but not circle
+        # alpha =  (np.arctan((reference_xytv[1] - pose[1]) / (reference_xytv[0] - pose[0])) - pose[2]) # tracks wave but not circle
+        # alpha =  -(np.arctan((reference_xytv[1] - pose[1]) / (reference_xytv[0] - pose[0])) - pose[2]) # passes unit test
