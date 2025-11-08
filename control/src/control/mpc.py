@@ -56,14 +56,18 @@ class ModelPredictiveController(BaseController):
                 control sequence
         """
         controls = np.empty((self.K, self.T, 2))
-        controls[:, :, 0] = 0  # to be pulled from the reference path later
+        controls[:, :, 0] = 0  # to be pulled from the reference path later. Each control's velocity is 0 for now
 
         # Hint: you may find the np.linspace function useful for computing the
         # sampled steering angles, and NumPy array broadcasting useful for
         # putting the sampled steering angles into controls.
         # BEGIN QUESTION 4.1
-        "*** REPLACE THIS LINE ***"
-        raise NotImplementedError
+
+        steering_angles = np.linspace(self.min_delta, self.max_delta, self.K)  
+
+        controls[:, :, 1] = steering_angles[:, None]      
+        
+
         # END QUESTION 4.1
         return controls
 
@@ -97,8 +101,21 @@ class ModelPredictiveController(BaseController):
         rollouts[:, 0, :] = pose  # all K rollouts start at current state
 
         # BEGIN QUESTION 4.2
-        "*** REPLACE THIS LINE ***"
-        raise NotImplementedError
+
+        for i in range(self.T):
+            changes = self.motion_model.compute_changes(rollouts[:, i, :], controls[:, i, :], dt) #
+            rollouts[:, i + 1, :] = rollouts[:, i, :] + changes 
+
+        # self.motion_model.compute_changes() documentation
+        # Args:
+        #     states: np.array of states with shape M x 3  (x, y, theta)
+        #     controls: np.array of controls with shape M x 2  (v, delta)
+        #     dt (float): control duration
+        #     delta_threshold (float): steering angle threshold
+
+        # Returns:
+        #     M x 3 np.array, where the three columns are dx, dy, dtheta
+
         # END QUESTION 4.2
         return rollouts
 
@@ -121,8 +138,12 @@ class ModelPredictiveController(BaseController):
         # coordinate of the final rollout state, and the x- and y- coordinate of
         # the reference state
         # BEGIN QUESTION 4.3
-        "*** REPLACE THIS LINE ***"
-        raise NotImplementedError
+        
+        costs = np.linalg.norm(rollouts[:, -1, 0:2] - reference_xyt[0:2], axis=1) * self.error_w
+
+        # print(costs)
+        return costs
+
         # END QUESTION 4.3
 
     def compute_collision_cost(self, rollouts, _):
@@ -151,8 +172,21 @@ class ModelPredictiveController(BaseController):
         # need one call to check_collisions_in_map.
 
         # BEGIN QUESTION 4.3
-        "*** REPLACE THIS LINE ***"
-        raise NotImplementedError
+        
+        K, T_plus_one, D = rollouts.shape
+
+        reshaped_rollouts = np.reshape(rollouts, (K * T_plus_one, D))
+        
+        collisions = np.reshape(self.check_collisions_in_map(reshaped_rollouts), (K, T_plus_one, 1))
+
+        collision_counts = np.sum(collisions, axis = 1)
+
+        costs = collision_counts * self.collision_w
+
+        # print(f"costs.shape from compute_collision_cost: {costs.squeeze(1).shape}")
+
+        return costs.squeeze(1)
+
         # END QUESTION 4.3
 
     def compute_rollout_cost(self, rollouts, reference_xyt):
@@ -197,11 +231,15 @@ class ModelPredictiveController(BaseController):
 
         # BEGIN QUESTION 4.4
         "*** REPLACE THIS LINE ***"
-        rollouts = np.zeros((self.K, self.T + 1, 3))
+        # rollouts = np.zeros((self.K, self.T + 1, 3))
+        rollouts = self.get_rollout(pose, self.sampled_controls)
+        # print(f"rollouts.shape: {rollouts.shape}")
         # END QUESTION 4.4
         # BEGIN QUESTION 4.4
         "*** REPLACE THIS LINE ***"
-        costs = np.zeros(self.K)
+        # costs = np.zeros(self.K)
+        costs = self.compute_rollout_cost(rollouts, reference_xytv)
+        # print(f"costs.shape from get_control: {costs.shape}")
         # END QUESTION 4.4
 
         # Set the controller's rollouts and costs (for visualization purposes).
@@ -212,8 +250,12 @@ class ModelPredictiveController(BaseController):
         # Hint: you may find the np.argmin function useful. Note that the
         # reference velocity has already been stored in self.sampled_controls.
         # BEGIN QUESTION 4.4
-        "*** REPLACE THIS LINE ***"
-        raise NotImplementedError
+        
+        best_rollout_index = np.argmin(costs)
+        best_controls = self.sampled_controls[best_rollout_index, :, :]
+        next_best_control = best_controls[0, :]
+        return next_best_control
+
         # END QUESTION 4.4
 
 

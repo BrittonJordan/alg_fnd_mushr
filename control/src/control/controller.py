@@ -102,7 +102,7 @@ class BaseController(object):
             if len(intermediate) == 0:
                 return len(path_xytv) - 1 # the last state
             first_valid_index = intermediate[0]
-            print(f"future_waypoints_far_enough_away:  {future_waypoints_far_enough_away}")
+            # print(f"future_waypoints_far_enough_away:  {future_waypoints_far_enough_away}")
             # print(f"first_valid_index: {first_valid_index}")
 
 
