@@ -47,6 +47,7 @@ class PlanarProblem(object):
         # Check that x and y are within the extents of the map.
         # BEGIN QUESTION 1.2
         "*** REPLACE THIS LINE ***"
+        # self.extents # np.array of lower and upper bounds with shape D x 2
         # END QUESTION 1.2
 
         # The units of the state are meters and radians. We need to convert the
