@@ -55,11 +55,18 @@ class HaltonSampler(Sampler):
         """
         # This differs by one from the reference implementation. This excludes 0
         # from our zero-indexed Halton sequence.
-        index += 1
 
+        index += 1
         # BEGIN QUESTION 1.1
-        "*** REPLACE THIS LINE ***"
-        raise NotImplementedError
+
+        fraction = 1
+        result = 0
+        while index > 0:
+            fraction = fraction / base
+            result = result + fraction * (index % base)
+            index = index // base
+        return result
+
         # END QUESTION 1.1
 
     def make_base_generator(self, base):
@@ -88,10 +95,17 @@ class HaltonSampler(Sampler):
         for i, x in zip(range(num_samples), self.gen):
             batch[i, :] = x
 
+        print(batch)
         # Scale the batch of samples to fit the extents of the space.
         # BEGIN QUESTION 1.1
-        "*** REPLACE THIS LINE ***"
-        raise NotImplementedError
+        
+        self.extents # np.array of lower and upper bounds with shape D x 2
+
+        ranges = self.extents[:, 1] - self.extents[:, 0]
+        samples = self.extents[:, 0] + ranges * batch
+
+        return samples
+
         # END QUESTION 1.1
 
 
