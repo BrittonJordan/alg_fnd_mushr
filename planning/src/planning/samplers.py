@@ -95,11 +95,11 @@ class HaltonSampler(Sampler):
         for i, x in zip(range(num_samples), self.gen):
             batch[i, :] = x
 
-        print(batch)
+        # print(batch)
         # Scale the batch of samples to fit the extents of the space.
         # BEGIN QUESTION 1.1
         
-        self.extents # np.array of lower and upper bounds with shape D x 2
+        # self.extents # np.array of lower and upper bounds with shape D x 2
 
         ranges = self.extents[:, 1] - self.extents[:, 0]
         samples = self.extents[:, 0] + ranges * batch
