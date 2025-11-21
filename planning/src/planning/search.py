@@ -7,6 +7,8 @@ import networkx as nx
 from itertools import count
 from cse478.utils import PriorityQueue
 
+from planning.roadmap import Roadmap
+
 
 # Entries in the PriorityQueue are prioritized in lexicographic order, i.e.  by
 # the first element of QueueEntry (the f-value). Ties are broken by proceeding
@@ -22,7 +24,7 @@ QueueEntry = collections.namedtuple(
 NULL = -1
 
 
-def astar(rm, start, goal):
+def astar(rm: Roadmap, start, goal):
     """Compute the shortest path from start to goal on a roadmap.
 
     Args:
@@ -49,7 +51,7 @@ def astar(rm, start, goal):
     queue.push(QueueEntry(rm.heuristic(start, goal), next(c), start, NULL, 0))
 
     while len(queue) > 0:
-        entry = queue.pop()
+        entry: QueueEntry = queue.pop()
         if expanded[entry.node]:
             continue
 
@@ -58,8 +60,16 @@ def astar(rm, start, goal):
             # parent exists). If it's in collision, stop processing this entry;
             # we'll wait for another possible parent later in the queue.
             # BEGIN QUESTION 2.2
-            "*** REPLACE THIS LINE ***"
-            raise NotImplementedError
+            
+            print(entry.parent)
+            if entry.parent != -1:
+                no_collision = rm.check_edge_validity(entry.node, entry.parent)
+
+                print(no_collision)
+
+                if not no_collision:
+                    continue
+        # print(entry)
             # END QUESTION 2.2
 
         expanded[entry.node] = True
@@ -70,6 +80,7 @@ def astar(rm, start, goal):
             return path, parents
 
         for neighbor, w in rm.graph[entry.node].items():
+
             # Get the edge weight (length) and heuristic value
             weight = w.get("weight")
             h = rm.heuristic(neighbor, goal)
@@ -86,8 +97,16 @@ def astar(rm, start, goal):
             # However, if the neighbor has already been expanded, it's no longer
             # necessary to insert this QueueEntry.
             # BEGIN QUESTION 2.1
-            "*** REPLACE THIS LINE ***"
-            raise NotImplementedError
+            
+            this_neighbor_cost_to_come = entry.cost_to_come + weight
+            f = this_neighbor_cost_to_come + h
+
+            qe = QueueEntry(f, next(c), neighbor, entry.node, this_neighbor_cost_to_come)
+
+            if not expanded[neighbor]:
+                queue.push(qe)
+
+
             # END QUESTION 2.1
     raise nx.NetworkXNoPath("Node {} not reachable from {}".format(goal, start))
 
@@ -96,7 +115,7 @@ def extract_path(parents, goal):
     """Extract the shortest path from start to goal.
 
     Args:
-        parents: np.array of integer node labels
+        parents: np.array of integer node labels (lookup table for parents)
         goal: integer node label for the goal state
 
     Returns:
@@ -104,8 +123,24 @@ def extract_path(parents, goal):
     """
     # Follow the parents of the node until a NULL entry is reached
     # BEGIN QUESTION 2.1
-    "*** REPLACE THIS LINE ***"
-    raise NotImplementedError
+    
+    vpath = []
+    curr_node_index = goal
+    parent_index = parents[goal]
+    vpath.append(goal)
+
+
+    # count = 0
+    while parent_index != -1: # while there is a parent for the current node on the path
+        vpath.append(parent_index)
+
+        curr_node_index = parent_index
+        parent_index = parents[curr_node_index]
+
+    vpath.reverse()
+
+    return vpath
+
     # END QUESTION 2.1
 
 

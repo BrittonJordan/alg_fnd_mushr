@@ -95,15 +95,26 @@ class Roadmap(object):
         # BEGIN QUESTION 1.3
         "*** REPLACE THIS LINE ***"
 
+        # print("DOING SOME WEIGHTED EDGE CHECKING BRO \n")
+
         valid_edges = []
         for index in range(weighted_edges.shape[0]):
             edge = weighted_edges[index, :]
-            is_valid = self.check_edge_validity(int(edge[0]), int(edge[1]))
+            # print(edge)
+            is_valid = self.check_edge_validity(int(edge[1]), int(edge[0]))
+
+            # print(is_valid)
+
+            # is_valid = self.check_edge_validity(int(edge[0]), int(edge[1]))
+            # print(is_valid)
+
 
             if is_valid:
                 valid_edges.append(edge)
         
         weighted_edges = np.array(valid_edges)
+
+        # print("FINISHED UP WITH THAT EDGE CHECKING BROSIF")
 
 
 
@@ -143,6 +154,7 @@ class Roadmap(object):
             self.weighted_edges = self.check_weighted_edges_validity(
                 self.weighted_edges
             )
+
 
         # Insert the vertices and edges into a NetworkX graph object
         if self.directed:

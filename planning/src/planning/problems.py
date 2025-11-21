@@ -50,7 +50,13 @@ class PlanarProblem(object):
         # self.extents # np.array of lower and upper bounds with shape D x 2
 
         within_extents = (states < (self.extents[:, 1])) * (states >= self.extents[:, 0])
+        if self.extents.shape[0] >= 3:
+            within_extents[:, 2] = True # any rotation is within the extents
         all_dims_within_extents = np.all(within_extents, axis=1)
+
+        # print(f"extents {self.extents}")
+        # print(f"states {states}")
+        # print(f"within_extents {within_extents}")
 
         # END QUESTION 1.2
 
