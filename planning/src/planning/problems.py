@@ -49,18 +49,8 @@ class PlanarProblem(object):
         "*** REPLACE THIS LINE ***"
         # self.extents # np.array of lower and upper bounds with shape D x 2
 
-        # within_x = (states[:, 0] <= self.extents[0, 1]) * (states[:, 0] >= self.extents[0, 0])
-
         within_extents = (states < (self.extents[:, 1])) * (states >= self.extents[:, 0])
         all_dims_within_extents = np.all(within_extents, axis=1)
-
-        print(f"states {states}")
-        print(f"extents {self.extents}")
-        print(f"all_dims_within_extents {all_dims_within_extents}")
-
-        # print(f"states {states}")
-        # print(f"self.extents {self.extents}")
-        # print(f"within {within_extents}")
 
         # END QUESTION 1.2
 
@@ -82,17 +72,12 @@ class PlanarProblem(object):
         "*** REPLACE THIS LINE ***"
 
         # self.permissible_region # Boolean np.array with shape map height x map width, where one indicates that the location is permissible
-        print(f"permissible {self.permissible_region}")
 
         valid = np.zeros(states.shape[0])
 
         states_within_extents = states[all_dims_within_extents].astype(int)
-        print(f"states_within_extents {states_within_extents}")
-        # valid[all_dims_within_extents] = self.permissible_region[states[all_dims_within_extents].astype(int)]
         valid[all_dims_within_extents] = self.permissible_region[states_within_extents[:, 1], states_within_extents[:, 0]]# * all_dims_within_extents
-
-        print(f"valid {valid}")
-
+        valid = valid.astype(bool)
         # END QUESTION 1.2
 
         # Convert the units back from pixels to meters for the caller
