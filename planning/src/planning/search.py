@@ -61,11 +61,11 @@ def astar(rm: Roadmap, start, goal):
             # we'll wait for another possible parent later in the queue.
             # BEGIN QUESTION 2.2
             
-            print(entry.parent)
+            # print(entry.parent)
             if entry.parent != -1:
                 no_collision = rm.check_edge_validity(entry.node, entry.parent)
 
-                print(no_collision)
+                # print(no_collision)
 
                 if not no_collision:
                     continue
@@ -166,10 +166,29 @@ def shortcut(rm, vpath, num_trials=100):
         # You may find these Roadmap methods useful: check_edge_validity,
         # heuristic, and compute_path_length.
         indices = np.random.choice(len(vpath), size=2, replace=False)
+        # print(indices)
         i, j = np.sort(indices)
         # BEGIN QUESTION 2.3
-        "*** REPLACE THIS LINE ***"
-        raise NotImplementedError
+        
+        not_collision = rm.check_edge_validity(vpath[i], vpath[j])
+
+        path_to_possibly_skip = vpath[i:j+1] 
+        leng = rm.compute_path_length(path_to_possibly_skip)
+        # print("WE MADE IT AFTER ALL")
+
+        shortcut_length = rm.compute_path_length([vpath[i], vpath[j]])
+
+        # estimated_length = rm.heuristic(vpath[i], vpath[j])
+        # print(f"shortcut length {shortcut_length}")
+        # print(f"actual length {leng}")
+        if not_collision and shortcut_length < leng:
+            # use the shortcut
+            # print("using the shortcut")
+            path_start = vpath[:i+1]
+            path_end = vpath[j:]
+
+            vpath = list(vpath[: i + 1]) + list(vpath[j:])
+
         # END QUESTION 2.3
     return vpath
 
